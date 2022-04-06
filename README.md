@@ -1,2 +1,2 @@
-# PDS-Programming_for_data_science
+# PDS-Investment_Strategies
 Assigment for Programming for Data Science subject
