@@ -17,13 +17,13 @@ try:
     time.sleep(1)
     accept_popup = driver.find_element(By.ID, "onetrust-accept-btn-handler").click()
     #time.sleep(2)
-    wait = WebDriverWait(driver,30)
+    #wait = WebDriverWait(driver,30)
     #try to move mouse
-    if  wait.until(EC.presence_of_element_located((By.ID, "PromoteSignUpPopUp"))) != NULL:
+    #if  wait.until(EC.presence_of_element_located((By.ID, "PromoteSignUpPopUp"))) != NULL:
        #time.sleep(1)
        #elemlist2 = driver.find_element(By.CLASS_NAME, "popupCloseIcon largeBannerCloser").click()
-        wait.until(EC.visibility_of_element_located((By.ID, "PromoteSignUpPopUp")))
-        driver.find_element(By.XPATH, '//*[@id="PromoteSignUpPopUp"]/div[2]/i').click()
+    #    wait.until(EC.visibility_of_element_located((By.ID, "PromoteSignUpPopUp")))
+    #    driver.find_element(By.XPATH, '//*[@id="PromoteSignUpPopUp"]/div[2]/i').click()
    
     #if driver.find_element(By.CLASS_NAME, "popupCloseIcon largeBannerCloser") is not NULL:
    
