@@ -123,7 +123,7 @@ class ObtainCSVFilesFromWeb():
                 # Wait until the table is available
                 html_table = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "curr_table"))) 
                 # Table to html form
-                df_html = pd.read_html(html_table.get_attribute('outerHTML')) 
+                df_html = pd.read_html(html_table.get_attribute('outerHTML'), index_col=0) 
                 # Table html to pandas DataFrame
                 df = pd.DataFrame(df_html[0]).drop(["Open", "High", "Low"], axis=1).convert_dtypes() 
                 # For US Dolar, compute the value of 1 US dolar for that day
@@ -131,7 +131,7 @@ class ObtainCSVFilesFromWeb():
                     
                 if os.path.isdir(f"{path_to_folder}") == False: os.mkdir(f"{path_to_folder}") 
                    
-                df.to_csv(path_or_buf=f"{path_to_folder}/{assetsid_csvname[asset_code]}", sep=';') # DataFrame to csv file
+                df.to_csv(path_or_buf=f"{path_to_folder}/{assetsid_csvname[asset_code]}") # DataFrame to csv file
 
         finally :
             driver.close() 
