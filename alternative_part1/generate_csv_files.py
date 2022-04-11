@@ -35,7 +35,6 @@ class ObtainCSVFilesFromWeb():
         # Checking parameter values
         assert isinstance(web_browser, str), "web_browser variable must be string type" 
         assert isinstance(web_page, str), "web_page variable must be string type"
-        assert web_page == "https://www.investing.com/", f"web_page must be 'https://www.investing.com/', {web_page} is not valid"
         assert web_browser == "Chrome", f"web_browser variable must be 'Chrome', {web_browser} is not allowed"
 
         self.web_page = web_page
@@ -78,6 +77,8 @@ class ObtainCSVFilesFromWeb():
             "US78463V1070":"spdr-gold-trust.csv", 
             "US Dollar Index (DXY)":"usdollar.csv"
         }
+        assert self.web_page == "https://www.investing.com/", f"web_page must be 'https://www.investing.com/', {self.web_page} is not valid for this function"
+        
         datasets_available = ["All", "Stocks", "Corporate bonds", "Public bonds", "Golds", "Cash"]
         
         if dataset not in datasets_available: exit(f"Please, select a valid dataset, '{dataset}' not available") 
