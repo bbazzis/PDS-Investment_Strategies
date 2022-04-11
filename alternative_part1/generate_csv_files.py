@@ -57,8 +57,8 @@ class ObtainCSVFilesFromWeb():
                 A string representing the csv file to be created. It can take one of the following values: 
                  - "All" to create all datasets.
                  - "Stocks" to create amundi-msci-wrld-ae-c.csv
-                 - "Corporate bonds" to create db-x-trackers-ii-global-sovereign-5.csv
-                 - "Public bonds" to create ishares-global-corporate-bond-$.csv
+                 - "Corporate bonds" to create ishares-global-corporate-bond-$.csv
+                 - "Public bonds" to create db-x-trackers-ii-global-sovereign-5.csv
                  - "Golds" to create spdr-gold-trust.csv
                  - "Cash" to create usdollar.csv         
         """
