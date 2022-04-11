@@ -72,8 +72,8 @@ class ObtainCSVFilesFromWeb():
         }
         assetsid_csvname = {
             "0P00012PP6":"amundi-msci-wrld-ae-c.csv", 
-            "CRPS":"db-x-trackers-ii-global-sovereign-5.csv", 
-            "XG7S":"ishares-global-corporate-bond-$.csv", 
+            "CRPS":"ishares-global-corporate-bond-$.csv", 
+            "XG7S":"db-x-trackers-ii-global-sovereign-5.csv", 
             "US78463V1070":"spdr-gold-trust.csv", 
             "US Dollar Index (DXY)":"usdollar.csv"
         }
