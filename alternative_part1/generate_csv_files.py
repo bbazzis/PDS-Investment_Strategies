@@ -3,9 +3,7 @@ This file contains all the code implementation corresponding to the part 1 of th
 The code below, through webscraping on the web page https://www.investing.com/ obtains 5 datasets corresponding to 5 desired assets.
 The datasets are generated in the directory 'csv_files'.
 
-To run the code in terminal: python3 generate_csv_files.py <route_to_csv_store_folder> <name_csv_to_create>
-<route_to_csv_store_folder>: -> route in which the user want to spawn the csv files
-<name_csv_to_create>: choose between the following values -> All or Stocks or Corporate bonds or Public bonds or Golds or Cash
+To run the code in terminal: python3 generate_csv_files.py 
 """
 
 from selenium import webdriver
@@ -15,7 +13,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
 import os
-import sys
 
 
 class ObtainCSVFilesFromWeb():
@@ -28,9 +25,9 @@ class ObtainCSVFilesFromWeb():
         
         Args:
             web_browser (str): 
-                A string representing the web browser.
+                A string represents the web browser.
             web_page (str):
-                A string representing the URL to the web page.
+                A string represents the URL to the web page.
         """
         # Checking parameter values
         assert isinstance(web_browser, str), "web_browser variable must be string type" 
@@ -38,10 +35,10 @@ class ObtainCSVFilesFromWeb():
         assert web_browser == "Chrome", f"web_browser variable must be 'Chrome', {web_browser} is not allowed"
 
         self.web_page = web_page
-        # driver = Chrome or Firefox depending on the value of the web_browser parameter
         if web_browser == "Chrome":
             chrome_options = Options()
             chrome_options.add_argument("--start-maximized")
+            # chrome_options.add_argument("--headless")
             # chrome_options.add_argument("--no-sandbox")
             # chrome_options.add_argument("--disable-dev-shm-usage")
             self.driver = webdriver.Chrome(options=chrome_options)
@@ -138,6 +135,14 @@ class ObtainCSVFilesFromWeb():
 
     
 if __name__ == "__main__":
-    ObtainCSVFilesFromWeb(web_browser='Chrome', web_page='https://www.investing.com/').create_datasets_from_investing(path_to_folder=sys.argv[1], dataset=sys.argv[2])
+    path_to_folder = input("Please, write the route when you want spawn csv files: ")
+    dataset = input('''Please, write one of the following words (without quotes) that represent the csv to spawn:
+                 - "All" --> to create all datasets.
+                 - "Stocks" --> to create amundi-msci-wrld-ae-c.csv
+                 - "Corporate bonds" --> to create ishares-global-corporate-bond-$.csv
+                 - "Public bonds "--> to create db-x-trackers-ii-global-sovereign-5.csv
+                 - "Golds to create" --> spdr-gold-trust.csv
+                 - "Cash" --> to create usdollar.csv 
+                 Enter chosen option: ''')
     
-    
+    ObtainCSVFilesFromWeb(web_browser='Chrome', web_page='https://www.investing.com/').create_datasets_from_investing(path_to_folder=path_to_folder, dataset=dataset)
