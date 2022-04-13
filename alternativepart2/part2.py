@@ -7,14 +7,13 @@ import numpy as np
 class Portfolio():
     
     def __init__(self, increment_decrement: float, assets: str):
+        
         assert increment_decrement > 0 and increment_decrement < 101, "Increment/decrement value must be higher than 1 and less than 101"
         self.increment_decrement = increment_decrement 
         available_assets = ["ST", "CB", "PB", "GO", "CA"]
         param_list_assets = list(assets.split(" "))
         unique_assets = list(set([asset for asset in param_list_assets if asset in available_assets]))
         self.assets = [asset for asset in available_assets if asset in unique_assets]
-         
-        
         assert len(self.assets) >= 1, "The assets selected are not available"
         
     def generate_portfolio_allocations_csv(self, path_to_folder: str):
@@ -52,23 +51,20 @@ class Portfolio():
             df["Date"] = df["Date"].apply(lambda x: str(x))
             # Col name changed and % character deleted
             df = df.rename(columns={"Change %": "Change"})
-            df["Change"] = df["Change"].apply(lambda x: x.replace("%", ""))
+            df["Change"] = pd.to_numeric(df["Change"].apply(lambda x: x.replace("%", "")))
             # Missing dates
             missing_dates = pd.date_range(start='2020-01-01', end='2020-12-31').difference(df["Date"])
             missing_dates_df = pd.DataFrame(missing_dates.strftime('%Y-%m-%d'), columns=["Date"])
             # For new dates, columns "Price" and "Change" are assigned the average of each column
             avg_price = df["Price"].mean()
             missing_dates_df["Price"] = round(avg_price, 2)
-            avg_change = df["Change"].apply(lambda x: pd.to_numeric(x.replace("%", ""))).mean()
+            avg_change = df["Change"].mean()
             missing_dates_df["Change"] = round(avg_change, 2)
-
             # If "Vol." column in pd.DataFrame then replace "K" (1e+3), "M" (1e+6) and "-" characters by mean of the column. The missing date rows the same
             if "Vol." in df.columns:
                 df = df.rename(columns={"Vol.": "Vol"})
                 units_val = {"K":1e+3, "M":1e+6}
-                # If "Vol" value is in all rows "-" drop "Vol"
-                if df["Vol"].str.contains("-").count() == len(df):
-                    df.drop("Vol", inplace=True, axis=1)
+                    
                 for unit, val in units_val.items():
                     if "Vol" in df.columns and df["Vol"].dtype == "O" and df["Vol"].str.contains(unit).any():
                         if df["Vol"].str.contains("-").any():
@@ -80,8 +76,9 @@ class Portfolio():
                             df["Vol"] = df["Vol"].apply(lambda x: pd.to_numeric(x.replace(unit, ""))*val)
                             avg_vol = round(df["Vol"].mean(), 3)
                             missing_dates_df["Vol"] = avg_vol
-            complete_dataframe = pd.concat([missing_dates_df, df], ignore_index=True).sort_values(by="Date").reset_index(drop=True)
-            csvs_processed[self.assets[type_asset_index]] = tuple(complete_dataframe)
+                      
+            complete_dataframe = pd.concat([missing_dates_df, df], ignore_index=True).sort_values(by="Date").reset_index(drop=True).dropna(axis=1)
+            csvs_processed[self.assets[type_asset_index]] = complete_dataframe
             type_asset_index += 1
             
             
@@ -112,8 +109,19 @@ class Portfolio():
 if __name__ == "__main__":
     
     
-    # increment_decrement = float(input("Please, write the value for the increment/decrement (the project statement recommends either 20 or 0.2, but it could be another one): "))
-    # if increment_decrement < 1.0: increment_decrement *= 10
+    increment_decrement = float(input("Please, write the value for the increment/decrement (the project statement recommends either 20 or 0.2, but it could be another one): "))
+    if increment_decrement < 1.0: increment_decrement *= 10
     assets = input("Please, write the assets from which you want to create the portfolio without quotes and separated by spaces ('ST' 'CB' 'PB' 'GO' 'CA'): ")
-    # path_to_folder = input("Please, write the route when you want spawn portfolio_allocations.csv files: ")
-    print(len(Portfolio(increment_decrement=20, assets=assets).treat_csv_files("part1/csv_files")))
+    path_to_folder = input("Please, type the route when you want spawn portfolio_allocations.csv files: ")
+    path_to_folder_csv_from_webscraping = input("Please, type the path where the csv files \033[1m from webscraping part \033[0m are located: ")
+    
+    csv_files_modified = Portfolio(increment_decrement=increment_decrement, assets=assets).treat_csv_files(path_to_folder_csv_from_webscraping)
+    
+    
+    # print(csv_files_modified["ST"])
+    # print(csv_files_modified["CB"])
+    # print(csv_files_modified["PB"])
+    # print(csv_files_modified["GO"])
+    # print(csv_files_modified["CA"])
+    
+   
