@@ -183,11 +183,3 @@ class Portfolio():
         portfolio_allocations["VOLAT"] = round((std_dev/sample_avg)*100, 3)   
         
         portfolio_allocations.to_csv(path_or_buf=f"{self.path_to_folder}/portfolio_metrics.csv", index=0)           
-                   
-                
-
-# if __name__ == "__main__":
-    
-    
-
- 
