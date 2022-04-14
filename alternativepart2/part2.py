@@ -9,11 +9,13 @@ class Portfolio():
     """
     This class allows to create a portfolio and also clean datasets from web scraping part.
     """
-    def __init__(self, assets: str, increment_decrement: float=20.0):
+    def __init__(self, path_to_folder: str, assets: str, increment_decrement: float=20.0):
         """
         Init Portfolio. Sets the increase/decrease of the portfolio and the assets from which I want to create the portfolio. 
         
         Args:
+            path_to_folder (str): 
+                A string indicating the path to the folder where the csv file is to be saved.
             assets (str):
                 A string that contains the acronyms of the different assets from which the portfolio is to be created.
             increment_decrement (float): 
@@ -22,6 +24,8 @@ class Portfolio():
         """
         
         assert increment_decrement > 0 and increment_decrement < 101, "Increment/decrement value must be higher than 1 and less than 101"
+        self.path_to_folder = path_to_folder
+        if os.path.isdir(f"{self.path_to_folder}") == False: os.mkdir(f"{self.path_to_folder}")
         self.increment_decrement = increment_decrement 
         available_assets = ["ST", "CB", "PB", "GO", "CA"]
         param_list_assets = list(assets.split(" "))
@@ -29,7 +33,7 @@ class Portfolio():
         self.assets = [asset for asset in available_assets if asset in unique_assets]
         assert len(self.assets) >= 1, "The assets selected are not available"
         
-    def generate_portfolio_allocations_csv(self, path_to_folder: str):
+    def generate_portfolio_allocations_csv(self):
         """
         Create portfolio allocations in the route specified in path_to_folder parameter and returns it as pd.DataFrame object.
         
@@ -43,8 +47,8 @@ class Portfolio():
         weights = list(range(0, 101, self.increment_decrement))
         generate_portfolios = sorted(product(weights, repeat=len(self.assets)), reverse=True)
         portfolio_allocations = pd.DataFrame([portfolio for portfolio in list(generate_portfolios) if sum(portfolio) == 100], columns=self.assets)
-        if os.path.isdir(f"{path_to_folder}") == False: os.mkdir(f"{path_to_folder}")
-        portfolio_allocations.to_csv(path_or_buf=f"{path_to_folder}/portfolio_allocations.csv", index=False)
+        
+        portfolio_allocations.to_csv(path_or_buf=f"{self.path_to_folder}/portfolio_allocations.csv", index=False)
         
         return portfolio_allocations
         
@@ -114,7 +118,7 @@ class Portfolio():
 
 
 
-    def generate_portfolio_metrics_csv(path_to_folder: str, treat_csv_files: dict, portfolio_allocations: pd.DataFrame,  money_invested: float, purchase_date: str="2020-01-01"):
+    def generate_portfolio_metrics_csv(self, treat_csv_files: dict, portfolio_allocations: pd.DataFrame, purchase_date: str="2020-01-01"):
         """
         Create portfolio metrics in path_to_folder route.
         
@@ -125,71 +129,73 @@ class Portfolio():
                 A dictionary in wich the key is the acronym of the asset and the value the treat csv in pd.DataFrame format.
             portfolio_allocations (pd.DataFrame):
                 The portfolio allocations generated previously in pd.DataFrame format.
-            money_invested (float):
-                A float that indicates the amount of money that SAM want to invest.
             purchase_date (str):
                 The date from which you want to calculate metrics. By default = "2020-01-01" (see exercise statement)
         """
-        
-        # ST,CB,PB,GO,CA,RETURN,VOLAT
-        # ST --> Stocks --> amundi-msci-wrld-ae-c.csv|| CB --> Corporate bonds --> ishares-global-corporate-bond-$.csv 
-        # PB --> Public bonds --> db-x-trackers-ii-global-sovereign-5.csv || GO --> Gold --> spdr-gold-trust.csv || CA --> Cash --> usdollar.csv 
-    
-        # Parameter checking
-        if money_invested <= 0: exit("The money to be invested must be greater than 0")
+
+        # Parameter checking.
         match = re.search("^(2020)(-)(0[1-9]|1[0-2])(-)(0[1-9]|1[0-9]|2[0-9]|3[0-1])$", purchase_date)
         if match == None: exit("Date format is not correct, the format must be the following: YYYY-MM-DD")
         if purchase_date in ["2020-02-30", "2020-02-31"]: exit("The introduced date does not exist")
         
+        money_invested = 10000 # This value really does not matter.
         allocations = portfolio_allocations.to_dict("list")
         asset_money_invested = {}
         asset_current_val = {}
+        asset_values = {}
         for asset in portfolio_allocations.columns:
-            # Calculating RETURN column
-            df_asset = treat_csv_files[asset]
-            purchase_price = float(df_asset[df_asset["Date"].astype("string") == purchase_date]["Price"])
-            current_price = float(df_asset[df_asset["Date"].astype("string") == "2020-12-31"]["Price"]) 
-            bj_num_assets = [(((money_invested*alloc)/100)/purchase_price) if alloc != 0 else 0.0 for alloc in allocations[asset]] 
-            asset_money_invested[asset] = [num_share*purchase_price for num_share in bj_num_assets]
-            asset_current_val[asset] = [num_share*current_price for num_share in bj_num_assets]
-            # TODO: Calculating VOLATILITY column
             
+            df_asset = treat_csv_files[asset]
+            # RETURN.
+            # Price initial date.
+            purchase_price = float(df_asset[df_asset["Date"].astype("string") == purchase_date]["Price"])
+            # Price last date.
+            current_price = float(df_asset[df_asset["Date"].astype("string") == "2020-12-31"]["Price"]) 
+            # Number of shares.
+            bj_num_shares = [(((money_invested*alloc)/100)/purchase_price) if alloc != 0 else 0.0 for alloc in allocations[asset]] 
+            # Buy amount and current value for each asset.
+            asset_money_invested[asset] = [num_share*purchase_price for num_share in bj_num_shares]
+            asset_current_val[asset] = [num_share*current_price for num_share in bj_num_shares]
+            # VOLATILITY.
+            # Prices for all days since purchase date (included).
+            prices = list(df_asset[df_asset["Date"].astype('string') >= purchase_date]["Price"])
+            # Calculating sharesji * priceji for all assets for all days for in all portfolios.
+            asset_values[asset] = np.array([np.array([num_shares * price for price in prices]) for num_shares in bj_num_shares]).T # Numpy is faster (implemented in C++)
+
+        # Valuei final calculation, (sum of matrix asset_values[asset]).
+        days_portfolio_prices = 0
+        for i in list(asset_values.values()):
+            days_portfolio_prices += i
+        df_prices_evol = pd.DataFrame(days_portfolio_prices) # Rows=days Cols=portfolios.
+        # RETURN parameters.    
         buy_amount = pd.DataFrame(asset_money_invested).sum(axis=1)
         current_value = pd.DataFrame(asset_current_val).sum(axis=1)
+        # VOLATILITY parameters.
+        std_dev = df_prices_evol.std(axis=0)
+        sample_avg = df_prices_evol.mean(axis=0)
+        # Final calculation of RETURN and VOLATILITY.
         portfolio_allocations["RETURN"] = round(((current_value - buy_amount)/buy_amount) * 100, 3)
+        portfolio_allocations["VOLAT"] = round((std_dev/sample_avg)*100, 3)   
+        
+        portfolio_allocations.to_csv(path_or_buf=f"{self.path_to_folder}/portfolio_metrics.csv", index=0)           
                    
-        portfolio_allocations.to_csv(path_or_buf="/home/rafael/Desktop/2nd_quarter/PythonCourse/final_assignment/part2/portfolios_csv/RETURN.csv", index=0)           
-                   
-                   
-                   
-                   
-                   
-                   
-                   
-                   
-        # if os.path.isdir(f"{path_to_folder}") == False: os.mkdir(f"{path_to_folder}")     
-        # df.to_csv(path_or_buf=f"{path_to_folder}/portfolio_metrics.csv") # DataFrame to csv file
+                
 
 if __name__ == "__main__":
     
+    path_to_folder_portfolio = input("Please, type the route when you want spawn \033[1m portfolio_allocations.csv \033[0m and \033[1m portfolio_metrics.csv \033[0m files: ")
+    path_to_folder_csv_from_webscraping = input("Please, type the path where the csv files \033[1m from webscraping part \033[0m are located: ")
     
-    # increment_decrement = float(input("Please, write the value for the increment/decrement (the project statement recommends either 20 or 0.2, but it could be another one): "))
-    # if increment_decrement < 1.0: increment_decrement *= 100
-        
-    # increment_decrement = int(increment_decrement)
-    # assets = input("Please, write the assets from which you want to create the portfolio without quotes and separated by spaces ('ST' 'CB' 'PB' 'GO' 'CA'): ")
-    # path_to_folder_portfolio = input("Please, type the route when you want spawn portfolio_allocations.csv files: ")
-    # path_to_folder_csv_from_webscraping = input("Please, type the path where the csv files \033[1m from webscraping part \033[0m are located: ")
+    increment_decrement = float(input("Please, write the value for \033[1m the increment/decrement (the project statement recommends either 20 or 0.2, but it could be another one): \033[0m "))
+    if increment_decrement < 1.0: increment_decrement *= 100
+    increment_decrement = int(increment_decrement)
+    assets = input("Please, write \033[1m the assets acronyms \033[0m from which you want to create the portfolio without quotes and separated by spaces \033[1m ('ST' 'CB' 'PB' 'GO' 'CA'):\033[0m ")
+    date = input("Please, write \033[1m the date \033[0m from which you want to generate metrics \033[1m (2020-01-01 recommended by the statement). \033[0m The date must be in the format 'YYYYY-MM-DD': ")
     
-    portfolio = Portfolio(increment_decrement=20, assets="ST CB PB GO CA") #increment_decrement=increment_decrement, assets=assets
-    portfolio_allocations = portfolio.generate_portfolio_allocations_csv(path_to_folder="part2/portfolios_csv") # path_to_folder=path_to_folder_portfolio
-    clean_webscraping_csv_files = portfolio.treat_csv_files(path_to_folder="part1/csv_files") # path_to_folder=path_to_folder_csv_from_webscraping
+    portfolio = Portfolio(path_to_folder=path_to_folder_portfolio, increment_decrement=increment_decrement, assets=assets) 
+    portfolio_allocations = portfolio.generate_portfolio_allocations_csv() 
+    clean_webscraping_csv_files = portfolio.treat_csv_files(path_to_folder=path_to_folder_csv_from_webscraping) 
     
-    portfolio.generate_portfolio_metrics_csv(treat_csv_files=clean_webscraping_csv_files, portfolio_allocations=portfolio_allocations, money_invested=10000, purchase_date="2020-01-01")
-    # print(clean_webscraping_csv_files["ST"])
-    # print(clean_webscraping_csv_files["CB"])
-    # print(clean_webscraping_csv_files["PB"])
-    # print(clean_webscraping_csv_files["GO"])
-    # print(clean_webscraping_csv_files["CA"])
+    portfolio.generate_portfolio_metrics_csv(treat_csv_files=clean_webscraping_csv_files, portfolio_allocations=portfolio_allocations, purchase_date="2020-01-01")
 
-    # print(clean_webscraping_csv_files.keys())
+ 
