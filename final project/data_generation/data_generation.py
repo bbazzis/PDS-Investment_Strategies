@@ -177,7 +177,7 @@ class Portfolio():
             # Prices for all days since purchase date (included).
             prices = list(df_asset[df_asset["Date"].astype('string') >= purchase_date]["Price"])
             # Calculating sharesji * priceji for all assets for all days for in all portfolios.
-            asset_values[asset] = np.array([np.array([num_shares*price for price in prices]) for num_shares in bj_num_shares]).T # Numpy is faster (implemented in C++)
+            asset_values[asset] = np.array([np.array([num_shares*price for price in prices]) for num_shares in bj_num_shares]).T 
 
         # Valuei final calculation, (sum of matrix asset_values[asset]).
         days_portfolio_prices = 0
