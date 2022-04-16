@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-This file allow the user to execute all .py files more comfortably.
+This file allow the user to execute all .py files more comfortably .
 Please, execute this file with the command: python3 executable.py
 """
 from data_generation.data_generation import *
