@@ -26,15 +26,16 @@ class CreateGraphsFromCsv():
         """
         
         # Parameter checking.
+        
         try:
             assert os.path.isfile(path_to_csv_file), f"\033[1m ERROR: \033[0m The path to the csv file ({path_to_csv_file}) is not valid."
+            assert "portfolio_metrics.csv" in path_to_csv_file, "\033[1m ERROR: \033[0m The file is not a portfolio_metrics.csv file. Please, check the path."
         except AssertionError as error:
             print(error)
             exit(1)
         if os.path.isdir(folder_to_save_graphs) == False: os.mkdir(folder_to_save_graphs)
-        self.path_to_csv_file = path_to_csv_file
         self.folder_to_save_graphs = folder_to_save_graphs
-        
+        self.path_to_csv_file = path_to_csv_file
         
     def bar_plot_type_portfolio(self, title="Number of each portfolio", x_label=None, y_label="Number of Portfolios", save_graph=True):
         """
@@ -53,21 +54,17 @@ class CreateGraphsFromCsv():
         
         df = pd.read_csv(self.path_to_csv_file)
         
-        if "portfolio_metrics.csv" in self.path_to_csv_file:
-            bars = ["Positive Portfolio", "Neutral Portfolio", "Negative Portfolio"]
-            data = [len(df[df["RETURN"] > 0]), len(df[df["RETURN"] == 0]), len(df[df["RETURN"] < 0])]
-            df = pd.DataFrame(data, bars, columns=["Number of Portfolios"])
-            sns.set(style="darkgrid")
-            sns.barplot(x=list(df.index), y=list(df["Number of Portfolios"]), palette=["green", "blue", "red"])
-            plt.ylabel(x_label)
-            plt.ylabel(y_label)
-            plt.title(title)
-            if save_graph: plt.savefig(self.folder_to_save_graphs + "/bar_plot.png")
-            plt.show()
-        else:
-            print("\033[1m ERROR: \033[0m The file is not a portfolio_metrics.csv file. Please, check the path.")
-            exit(1)
-    
+        bars = ["Positive Portfolio", "Neutral Portfolio", "Negative Portfolio"]
+        data = [len(df[df["RETURN"] > 0]), len(df[df["RETURN"] == 0]), len(df[df["RETURN"] < 0])]
+        df = pd.DataFrame(data, bars, columns=["Number of Portfolios"])
+        sns.set(style="darkgrid")
+        sns.barplot(x=list(df.index), y=list(df["Number of Portfolios"]), palette=["green", "blue", "red"])
+        plt.ylabel(x_label)
+        plt.ylabel(y_label)
+        plt.title(title)
+        if save_graph: plt.savefig(self.folder_to_save_graphs + "/bar_plot.png")
+        plt.show()
+        
     
     def bar_plot_sum_assets(self, title="Sum of percentage of investments for each type of portfolio", y_label="Percentage of investments", save_graph=True):
         """
@@ -121,7 +118,7 @@ class CreateGraphsFromCsv():
         plt.show()
     
     
-    def scatter_chart(self, x, y, color, title="Risk-Return bubble chart", x_label="Risk (Volatility)", y_label="Return", save_graph=True):
+    def scatter_chart(self, x="VOLAT", y="RETURN", color="COLOR", title="Risk-Return bubble chart", x_label="Risk (Volatility)", y_label="Return", save_graph=True):
         """
         Create a scatter chart from csv specified in the constructor of the class .
         
@@ -146,17 +143,14 @@ class CreateGraphsFromCsv():
         df["COLOR"] = ["green" if x > 0 else "red" if x < 0 else "blue" for x in df["RETURN"]]
         df["TYPE_PORTFOLIO"] = ["Positive portfolio" if x > 0 else "Negative portfolio" if x < 0 else "Neutral portfolio" for x in df["RETURN"]]
 
-        if "portfolio_metrics.csv" in self.path_to_csv_file:
-            plt.subplots(figsize=(8,8))
-            plt.scatter(x = df[df["RETURN"] > 0][x], s=100, y = df[df["RETURN"] > 0][y], c=df[df["RETURN"] > 0][color], cmap="Accent", alpha=0.6, edgecolors="white", linewidth=2 , label="Positive Portfolio")
-            plt.scatter(x = df[df["RETURN"] == 0][x], s=100, y = df[df["RETURN"] == 0][y], c=df[df["RETURN"] == 0][color], cmap="Accent", alpha=0.6, edgecolors="white", linewidth=2, label="Neutral Portfolio")
-            plt.scatter(x = df[df["RETURN"] < 0][x], s=100, y = df[df["RETURN"] < 0][y], c=df[df["RETURN"] < 0][color], cmap="Accent", alpha=0.6, edgecolors="white", linewidth=2, label="Negative Portfolio")
-            plt.legend()
-            plt.title(title)
-            plt.xlabel(x_label)
-            plt.ylabel(y_label)
-            if save_graph: plt.savefig(self.folder_to_save_graphs + "/scatter_chart.png")
-            plt.show()  
-        else:
-            print("\033[1m ERROR: \033[0m The file is not a portfolio_metrics.csv file. Please, check the path.")
-            exit(1)
+        plt.subplots(figsize=(8,8))
+        plt.scatter(x = df[df["RETURN"] > 0][x], s=100, y = df[df["RETURN"] > 0][y], c=df[df["RETURN"] > 0][color], cmap="Accent", alpha=0.6, edgecolors="white", linewidth=2 , label="Positive Portfolio")
+        plt.scatter(x = df[df["RETURN"] == 0][x], s=100, y = df[df["RETURN"] == 0][y], c=df[df["RETURN"] == 0][color], cmap="Accent", alpha=0.6, edgecolors="white", linewidth=2, label="Neutral Portfolio")
+        plt.scatter(x = df[df["RETURN"] < 0][x], s=100, y = df[df["RETURN"] < 0][y], c=df[df["RETURN"] < 0][color], cmap="Accent", alpha=0.6, edgecolors="white", linewidth=2, label="Negative Portfolio")
+        plt.legend()
+        plt.title(title)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        if save_graph: plt.savefig(self.folder_to_save_graphs + "/scatter_chart.png")
+        plt.show()  
+        
