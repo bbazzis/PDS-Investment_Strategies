@@ -158,9 +158,8 @@ class Portfolio():
         
         money_invested = 10000 # This value really does not matter.
         allocations = portfolio_allocations.to_dict("list")
-        asset_money_invested = {}
-        asset_current_val = {}
-        asset_values = {}
+        asset_money_invested, asset_current_val, asset_values = {}, {}, {}
+ 
         for asset in portfolio_allocations.columns:
             
             df_asset = treat_csv_files[asset]
