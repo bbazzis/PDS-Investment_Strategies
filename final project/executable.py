@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+This file allow the user to execute all .py files more comfortably.
+Please, execute this file with the command: python3 executable.py
+"""
 from data_generation.data_generation import *
 from web_scraping.web_scraping import *
 from data_analysis.data_analysis import *
