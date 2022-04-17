@@ -80,7 +80,7 @@ class Portfolio():
         asset_csv_names = {"ST":"amundi-msci-wrld-ae-c.csv", "CB":"ishares-global-corporate-bond-$.csv", "PB":"db-x-trackers-ii-global-sovereign-5.csv", "GO":"spdr-gold-trust.csv", "CA":"usdollar.csv"}
         remove_keys = [asset for asset in asset_csv_names.keys() if asset not in self.assets]
         for asset in remove_keys: del asset_csv_names[asset] 
-        path_csvs_availables = [web_scraping_csv_folder_path + "/" + csv_name for _, csv_name in asset_csv_names.items() if os.path.exists(web_scraping_csv_folder_path + "/" + csv_name)] 
+        path_csvs_availables = [web_scraping_csv_folder_path + "/" + csv_name for csv_name in asset_csv_names.values() if os.path.exists(web_scraping_csv_folder_path + "/" + csv_name)] 
         
         # Parameter checking.
         try:

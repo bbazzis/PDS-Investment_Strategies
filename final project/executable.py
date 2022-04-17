@@ -41,5 +41,6 @@ if consent == "Yes":
     save_graph_folder = input("Please, write the" + color.PURPLE + color.BOLD + " route" + color.END + " when you want" + color.PURPLE + color.BOLD + " spawn the graphs" + color.END + ": ")
     graphs = CreateGraphsFromCsv(path_to_csv_file=path_to_folder_portfolio + "/portfolio_metrics.csv", folder_to_save_graphs=save_graph_folder)
     graphs.bar_plot_type_portfolio()
+    graphs.bar_plot_investing_asset()
     graphs.bar_plot_sum_assets()
     graphs.scatter_chart()             

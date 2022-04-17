@@ -26,7 +26,6 @@ class CreateGraphsFromCsv():
         """
         
         # Parameter checking.
-        
         try:
             assert os.path.isfile(path_to_csv_file), f"\033[1m ERROR: \033[0m The path to the csv file ({path_to_csv_file}) is not valid."
             assert "portfolio_metrics.csv" in path_to_csv_file, "\033[1m ERROR: \033[0m The file is not a portfolio_metrics.csv file. Please, check the path."
@@ -36,6 +35,7 @@ class CreateGraphsFromCsv():
         if os.path.isdir(folder_to_save_graphs) == False: os.mkdir(folder_to_save_graphs)
         self.folder_to_save_graphs = folder_to_save_graphs
         self.path_to_csv_file = path_to_csv_file
+        
         
     def bar_plot_type_portfolio(self, title="Number of each portfolio", x_label=None, y_label="Number of Portfolios", save_graph=True):
         """
@@ -59,14 +59,14 @@ class CreateGraphsFromCsv():
         df = pd.DataFrame(data, bars, columns=["Number of Portfolios"])
         sns.set(style="darkgrid")
         sns.barplot(x=list(df.index), y=list(df["Number of Portfolios"]), palette=["green", "blue", "red"])
-        plt.ylabel(x_label)
+        plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.title(title)
         if save_graph: plt.savefig(self.folder_to_save_graphs + "/bar_plot.png")
         plt.show()
         
     
-    def bar_plot_sum_assets(self, title="Sum of percentage of investments for each type of portfolio", y_label="Percentage of investments", save_graph=True):
+    def bar_plot_sum_assets(self, title="Average percentage of investments for each type of portfolio since 2020-01-01 to 2020-12-31", y_label="Average investment percentage", save_graph=True):
         """
         Create a bar plot of the sum of investments in each asset for each type of portfolio (Positive, negative or neutral return).
         
@@ -86,7 +86,7 @@ class CreateGraphsFromCsv():
         asset_sum_percentage = {}
 
         for name in name_assets:
-            asset_sum_percentage[name] = [sum(df[df["RETURN"] < 0][name]), sum(df[df["RETURN"] == 0][name]), sum(df[df["RETURN"] > 0][name])]
+            asset_sum_percentage[name] = [df[df["RETURN"] < 0][name].mean(), df[df["RETURN"] == 0][name].mean(), df[df["RETURN"] > 0][name].mean()]
 
         barWidth = 0.1
 
@@ -98,7 +98,7 @@ class CreateGraphsFromCsv():
 
         plt.subplots(figsize=(8,8))
 
-        for k,v in asset_sum_percentage.items():
+        for k, v in asset_sum_percentage.items():
             if k == "ST":
                 plt.bar(r1, v, color="blue", width=barWidth, edgecolor="white", label='Stocks')
             elif k == "CB":
@@ -116,8 +116,43 @@ class CreateGraphsFromCsv():
         plt.legend()
         if save_graph: plt.savefig(self.folder_to_save_graphs + "/bar_plot_sum_assets.png")
         plt.show()
+        
+        
+    def bar_plot_investing_asset(self, title="Average return investing in ", x_label="Percentage of investement", y_label="Average return", save_graph=True):
+        """
+        Create one bar plot for each asset and each one show the return per percentage invested in that asset.
+        
+        Args:
+            title (str): 
+                A string indicating the title for the bar plot.
+            x_label (str): 
+                A string indicating the label for x-axe.
+            y_label (str): 
+                A string indicating the label for y-axe.
+            save_graph (bool): 
+                A boolean indicating if the user want to save the graph.
+        """
+        df = pd.read_csv(self.path_to_csv_file)
+        name_assets = [name for name in list(df.columns) if name in ["ST", "CB", "PB", "GO", "CA"]]
     
-    
+        fig, ax = plt.subplots(5, 1, figsize=(10, 20))
+        idx = 0
+        for name in name_assets:
+            df2 = df[[name, "RETURN"]]
+            df2 = df2.groupby(name).mean().sort_values(name)
+            
+            sns.set(style="darkgrid")
+            sns.barplot(ax=ax[idx], x=list(df2.index), y=list(df2["RETURN"]), palette=["green", "blue", "red", "yellow", "orange", "purple"])
+            ax[idx].set_xlabel(x_label)
+            ax[idx].set_ylabel(y_label)
+            ax[idx].set_title(title + name)
+            idx += 1
+        
+        fig.tight_layout()   
+        if save_graph: plt.savefig(self.folder_to_save_graphs + "/average_return_investing_asset.png")    
+        plt.show()
+        
+            
     def scatter_chart(self, x="VOLAT", y="RETURN", color="COLOR", title="Risk-Return bubble chart", x_label="Risk (Volatility)", y_label="Return", save_graph=True):
         """
         Create a scatter chart from csv specified in the constructor of the class .
@@ -153,4 +188,3 @@ class CreateGraphsFromCsv():
         plt.ylabel(y_label)
         if save_graph: plt.savefig(self.folder_to_save_graphs + "/scatter_chart.png")
         plt.show()  
-        
