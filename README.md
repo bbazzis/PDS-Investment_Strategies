@@ -1,6 +1,7 @@
 # PDS-Investment_Strategies
 Assigment for Programming for Data Science subject
 
+## Instructions
 To run the code (```final_project version folder```) type in terminal the following lines:
 
 ```console
@@ -50,3 +51,11 @@ Please write the ```route``` when you want ```spawn the graphs```:
 ```console 
 graphs_folder
 ```
+
+## Directories and files description
+  - ```data_analysis/data_analysis.py```: generation of graphs for answering questions related to investment strategies analysis.
+  - ```data_generation/data_generation.py```: data preprocessing, generation of portfolio allocation and creation of new protfolio metrics (return and volatility).
+  - ```graphs_folder/```: plots obtained from ```data_analysis.py```.
+  - ```portfolios_csv_files_folder/```: datasets containing portfolio allocation and new metrics, obtained from ```data_generation.py```.
+  - ```web_scraping/web_scraping.py```: data harvesting from https://www.investing.com/.
+  - ```web_scraping_csv_files_folder```: raw datasets obtained from ```web_scraping.py```.
