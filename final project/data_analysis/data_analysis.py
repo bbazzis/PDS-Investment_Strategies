@@ -20,7 +20,7 @@ class CreateGraphsFromCsv():
         
         Args:
             path_to_csv_file (str): 
-                A string indicating the path where portfolio_metrics.csv is located.
+                A string indicating the path to portfolio_metrics.csv.
             folder_to_save_graphs (str):
                 A string that indicates the folder where you want to save the graphs.
         """
